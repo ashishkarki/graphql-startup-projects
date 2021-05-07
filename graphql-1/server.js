@@ -1,6 +1,7 @@
 import express from 'express'
 import { buildSchema } from 'graphql'
 import { graphqlHTTP } from 'express-graphql'
+import axios from 'axios'
 
 import { DEFAULTS } from './constants.js'
 
@@ -8,6 +9,13 @@ const app = express()
 
 // graphql schema
 const schema = buildSchema(`
+  type Post {
+    userId: Int
+    id: Int
+    title: String
+    body: String
+  }
+
   type User {
     name: String
     age: Int
@@ -20,6 +28,7 @@ const schema = buildSchema(`
     welcome(name: String, dayOfWeek: String!): String
     getUser: User
     getUsers: [User]
+    getPostsFromTypiCodeApi: [Post]
   }
 `)
 
@@ -61,6 +70,10 @@ const root = {
 
     console.log(`getUsers returns: ${ JSON.stringify(users) }`)
     return users
+  },
+  getPostsFromTypiCodeApi: async () => {
+    const result = await axios.get(`http://jsonplaceholder.typicode.com/posts`)
+    return result.data
   }
 }
 
