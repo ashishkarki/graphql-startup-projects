@@ -7,6 +7,9 @@ import { DEFAULTS } from './constants.js'
 
 const app = express()
 
+// dummy message variable
+let message = 'This is a message'
+
 // graphql schema
 const schema = buildSchema(`
   type Post {
@@ -29,8 +32,21 @@ const schema = buildSchema(`
     getUser: User
     getUsers: [User]
     getPostsFromTypiCodeApi: [Post]
+    getMessage: String
+  }
+
+  input UserInput {
+    name: String!
+    age: Int!
+    college: String!
+  }
+
+  type Mutation {
+    setMessage(newMsg: String): String
+    createUser(user: UserInput): User
   }
 `)
+// createUser(name: String!, age: Int!, college: String!): User
 
 const root = {
   hello: () => {
@@ -42,7 +58,12 @@ const root = {
     return 'Hello that cannot return null'
   },
   welcome: args => {
-    // console.log(args)
+    /*
+      Example usage:
+      query {
+        welcome(dayOfWeek: "Sunday", name: "ramesh suresh")
+      }
+    */
     return `Hey person named: ${ args.name }. Today is ${ args.dayOfWeek }`
   },
   getUser: () => {
@@ -74,6 +95,27 @@ const root = {
   getPostsFromTypiCodeApi: async () => {
     const result = await axios.get(`http://jsonplaceholder.typicode.com/posts`)
     return result.data
+  },
+  setMessage: ({ newMsg }) => {
+    /*
+      Example usage:
+      mutation {
+        setMessage(newMsg: "Mutated item")
+      }
+    */
+    message = newMsg
+    return message
+  },
+  getMessage: () => message,
+  createUser: (args) => { // { name, age, college }
+    // const newUser = {
+    //   name: name,
+    //   age,
+    //   college
+    // }
+    // return newUser
+
+    return args.user
   }
 }
 
